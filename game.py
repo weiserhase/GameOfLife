@@ -1,3 +1,5 @@
+import tkinter
+
 import numpy as np
 import pygame as pg
 
@@ -6,6 +8,26 @@ from main import *
 
 pg.font.init()
 gui_font = pg.font.Font(None, 30)
+
+
+def open_file():
+    """Create a Tk file dialog and cleanup when finished"""
+    print("oppen")
+    top = tkinter.Tk()
+    top.withdraw()  # hide window
+    file_name = tkinter.filedialog.askopenfilename()
+    top.destroy()
+    return file_name
+
+
+def save_file():
+    print("save")
+    top = tkinter.Tk()
+    top.withdraw()  # hide window
+    file_name = tkinter.filedialog.asksaveasfile(initialfile='game.grid',
+                                                 defaultextension=".grid", filetypes=[("All Files", "*.*"), ("Text Documents", "*.txt")])
+    top.destroy()
+    return file_name
 
 
 def blit_text(surface, text, pos, font=gui_font, color=pg.Color('white')):
@@ -48,6 +70,10 @@ class GameCore:
         self.init_screen()
 
         self.menu_config = MenuConfig([
+            Button("LoadFile", 150, 50, (250, 300), 1,
+                   self.screen, self.change_scene),
+            Button("SaveFile", 150, 50, (550, 300), 1,
+                   self.screen, self.change_scene),
             Button("Draw", 150, 50, (600, 400), 1,
                    self.screen, self.change_scene),
             Button("Clear", 150, 50, (400, 400), 1,
@@ -65,7 +91,9 @@ class GameCore:
         self.callbacks = {
             "Menu": self.draw_menu,
             "Game": self.draw_game,
-            "Draw": self.draw_draw
+            "Draw": self.draw_draw,
+            "LoadFile": self.load_file,
+            "SaveFile": self.safe_file,
         }
         self.step = True
         self.needs_step = False
@@ -86,6 +114,10 @@ class GameCore:
         elif text == "Step":
             self.needs_step = True
             self.scene = "Game"
+        elif text == "LoadFile":
+            self.scene = "LoadFile"
+        elif text == "SaveFile":
+            self.scene = "SaveFile"
         elif text == "Clear":
             self.game.populate_grid(
                 np.zeros(self.game.grid.shape, dtype=int), False)
@@ -97,6 +129,17 @@ class GameCore:
         pg.init()
         self.screen = pg.display.set_mode(self.res, pg.RESIZABLE)
         self.clock = pg.time.Clock()
+
+    def safe_file(self):
+        f = save_file()
+        np.savetxt(f, self.game.grid, delimiter=",")
+        self.scene = "Menu"
+
+    def load_file(self):
+        f = open_file()
+        arr = np.loadtxt(f, delimiter=",")
+        self.game.populate_grid(arr)
+        self.scene = "Menu"
 
     def draw_grid(self):
         self.screen.fill(pg.Color("black"))
