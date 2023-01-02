@@ -1,5 +1,6 @@
 import numpy as np
 import pygame as pg
+
 from buttons import Button
 from main import *
 
@@ -33,7 +34,7 @@ class MenuConfig:
 
 
 class GameCore:
-    def __init__(self, game: Game, width: int = 900, height: int = 900, fps: int = 60) -> None:
+    def __init__(self, game: Game, width: int = 900, height: int = 900, fps: int = 60, animation_rate: int = 1) -> None:
         self.game = game
         num_cells = game.grid.shape
         self.x_cells, self.y_cells = num_cells
@@ -43,6 +44,7 @@ class GameCore:
         self.res = width, height
         self.h_width, self.h_height = width//2, height//2
         self.fps = fps
+        self.animation_rate = animation_rate
         self.init_screen()
 
         self.menu_config = MenuConfig([
@@ -123,7 +125,8 @@ class GameCore:
         description = """
             This is a implementation for the Game of life.
             You are finding yourself in the menu right now.
-            The first row of buttons are buttons for initializing a grid \n
+            The first row of buttons are buttons for initializing a grid \n\n
+            Press SPACE to return to menu\n\n
             In the Drawing mode you can change the cellstate by clicking on the cell (leftclick). 
             You can go back to the Menu by pressing ENTER
             In the Step mode you can evolve the next generation by hitting ENTER\n
@@ -133,7 +136,7 @@ class GameCore:
         # self.screen.blit(surface, (550, 50))
 
     def event_handler(self, event):
-        # print(event.type)
+
         if event.type == pg.QUIT:
             exit()
         if event.type == pg.MOUSEBUTTONDOWN and self.scene == "Draw":
@@ -152,6 +155,8 @@ class GameCore:
             self.change_scene("Menu")
         if event.type == 768 and self.scene == "Game":
             self.step = True
+        if event.type == 771:
+            self.scene = "Menu"
 
     def run(self):
         while True:
@@ -165,6 +170,8 @@ class GameCore:
             pg.display.set_caption(self.scene)
             # print(str(self.clock.get_fps()))
             pg.display.flip()
+            if(self.scene == "Game"):
+                self.clock.tick(self.animation_rate)
             self.clock.tick(self.fps)
 
 
@@ -189,7 +196,7 @@ def main():
     game.populate_grid(grid)
 
     # set framerate her at fps
-    screen = GameCore(game, fps=5)
+    screen = GameCore(game, fps=60, animation_rate=5)
     screen.run()
 
 
