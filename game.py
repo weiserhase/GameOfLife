@@ -48,10 +48,13 @@ class GameCore:
         self.init_screen()
 
         self.menu_config = MenuConfig([
-            Button("Draw", 150, 50, (550, 400), 1,
+            Button("Draw", 150, 50, (600, 400), 1,
                    self.screen, self.change_scene),
-            Button("Random", 150, 50, (250, 400), 1,
+            Button("Clear", 150, 50, (400, 400), 1,
                    self.screen, self.change_scene),
+            Button("Random", 150, 50, (200, 400), 1,
+                   self.screen, self.change_scene),
+
             Button("Start", 150, 50, (550, 500), 1,
                    self.screen, self.change_scene),
             Button("Step", 150, 50, (250, 500), 1,
@@ -72,16 +75,21 @@ class GameCore:
 
     def change_scene(self, text):
         if text == "Draw":
-            self.game.populate_grid(np.zeros(self.game.grid.shape), False)
+            # self.game.populate_grid(np.zeros(self.game.grid.shape), False)
             self.scene = text
         elif text == "Random":
             self.random_grid()
             self.scene = "Menu"
         elif text == "Game" or text == "Start":
+            self.needs_step = False
             self.scene = "Game"
         elif text == "Step":
             self.needs_step = True
             self.scene = "Game"
+        elif text == "Clear":
+            self.game.populate_grid(
+                np.zeros(self.game.grid.shape, dtype=int), False)
+            self.scene = "Menu"
         else:
             self.scene = "Menu"
 
